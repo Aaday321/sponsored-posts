@@ -1,17 +1,11 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
-import Chat from "@/app/(tabs)/chat";
+import { Platform, StyleSheet } from 'react-native'
+import Chat from "@/app/(tabs)/chat"
+import HaggleBox from "@/app/(tabs)/chat/HaggleBox"
 
 export default function HomeScreen() {
   return (
-    <Chat/>
-  );
+    <HaggleBox/>
+  )
 }
 
 const styles = StyleSheet.create({
@@ -31,4 +25,4 @@ const styles = StyleSheet.create({
     left: 0,
     position: 'absolute',
   },
-});
+})
