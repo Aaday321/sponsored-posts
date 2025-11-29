@@ -1,14 +1,19 @@
+
 import type { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
+import { faChevronRight, faClock } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-import { useMemo, useState } from "react"
-import { Animated, Pressable, StyleSheet, Text, View } from "react-native"
+import { useMemo, useRef, useState } from "react"
+import { Animated, PanResponder, Pressable, StyleSheet, Text, View } from "react-native"
+import tools from '@/app/static/tools'
+const { displayMoney } = tools
 
 
 export default function HaggleBox() {
     const [ dealStarted, setDealStarted ] = useState(false)
     const [ isCollapsed, setIsCollapsed ] = useState(false)
-    const animation = useMemo(() => new Animated.Value(0), [])
+    const [ showAddTime, setShowAddTime ] = useState(true)
+    const animationController = useRef(new Animated.Value(0)).current
+    const gestureStartValue = useRef(0)
 
     const toggleCollapsed = () => {
         let nextCollapsed
@@ -17,63 +22,165 @@ export default function HaggleBox() {
             return nextCollapsed
         })
 
-        Animated.timing(animation, {
+        Animated.timing(animationController, {
             toValue: nextCollapsed ? 1 : 0,
             duration: 250,
             useNativeDriver: false, // we animate height, so must be false
         }).start()
+
     }
 
-    const animatedHeight = animation.interpolate({
+    const panResponder = useMemo(
+        () =>
+            PanResponder.create({
+                onStartShouldSetPanResponder: () => true,
+                onMoveShouldSetPanResponder: () => true,
+                onPanResponderGrant: () => {
+                    animationController.stopAnimation((value: number) => {
+                        gestureStartValue.current = value
+                    })
+                },
+                onPanResponderMove: (_, { dy }) => {
+                    // Allow some over-drag past 0/1 with a rubber-band effect
+                    const raw = gestureStartValue.current - dy / 200
+
+                    let newValue = raw
+                    if (raw < 0) {
+                        // Ease out as you pull past fully expanded
+                        newValue = -Math.atan(-raw) / (Math.PI / 2)
+                    } else if (raw > 1) {
+                        // Ease out as you pull past fully collapsed
+                        const over = raw - 1
+                        newValue = 1 + Math.atan(over) / (Math.PI / 2)
+                    }
+
+                    animationController.setValue(newValue)
+                },
+                onPanResponderRelease: (_, { dy, vy }) => {
+                    // Treat tiny movement as a tap
+                    if (Math.abs(dy) < 5 && Math.abs(vy) < 0.3) {
+                        toggleCollapsed()
+                        return
+                    }
+
+                    // Flicks: decide based mainly on velocity
+                    if (Math.abs(vy) > 1) {
+                        const shouldCollapse = vy < 0 // flick up = collapse
+                        setIsCollapsed(shouldCollapse)
+                        Animated.timing(animationController, {
+                            toValue: shouldCollapse ? 1 : 0,
+                            duration: 180,
+                            useNativeDriver: false,
+                        }).start()
+                        return
+                    }
+
+                    const rawValue = gestureStartValue.current - dy / 200
+                    const clampedValue = Math.max(0, Math.min(1, rawValue))
+                    const shouldCollapse = clampedValue > 0.5
+
+                    setIsCollapsed(shouldCollapse)
+                    Animated.timing(animationController, {
+                        toValue: shouldCollapse ? 1 : 0,
+                        duration: 200,
+                        useNativeDriver: false,
+                    }).start()
+                },
+            }),
+        [animationController],
+    )
+
+    // Raw animationController may go slightly beyond [0,1] during rubber-band.
+    // visualProgress is clamped so only height stretches; everything else stays in-range.
+    const visualProgress = animationController.interpolate({
         inputRange: [0, 1],
-        outputRange: [160, 100],
+        outputRange: [0, 1],
+        extrapolate: "clamp",
     })
 
-    const animatedRotate = animation.interpolate({
-        inputRange: [0, 1],
-        outputRange: ["90deg", "0deg"],
+    const animatedHeight = animationController.interpolate({
+        // Give the green bar more stretch past both ends
+        inputRange: [-0.6, 0, 1, 1.6],
+        outputRange: [210, 160, 100, 70],
     })
 
-    const animatedFontSize = animation.interpolate({
+    const animatedRotate = visualProgress.interpolate({
+        inputRange: [0, 1],
+        outputRange: ["-90deg", "90deg"],
+    })
+
+    const animatedFontSize = visualProgress.interpolate({
         inputRange: [0, 1],
         outputRange: [70, 28],
     })
 
-    const animatedPaddingBottom = animation.interpolate({
+    const animatedPaddingBottom = visualProgress.interpolate({
         inputRange: [0, 1],
         outputRange: [45, 0],
     })
 
-    const MONEY_AMOUNT = 800.00
+    const animatedSubTranslateY = visualProgress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, -150],
+    })
+
+    const animatedSubOpacity = visualProgress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [1, 1],
+    })
+
+    const MONEY_AMOUNT = 800
 
     return (
         <>
-            <Animated.View style={[styles.bg, { height: animatedHeight, paddingTop: animatedPaddingBottom }]}>
-                <Pressable
-                    onPress={!dealStarted ? toggleCollapsed : undefined}
-                >
-                    <View style={styles.row}>
-                                <Animated.Text style={[styles.money, { fontSize: animatedFontSize }]}>
-                                    ${MONEY_AMOUNT}
-                                </Animated.Text>
-                                <View style={styles.chevronContainer}>
-                                    <Animated.View style={{ transform: [{ rotate: animatedRotate }] }}>
-                                        <FontAwesomeIcon
-                                            icon={faChevronRight as IconProp}
-                                        />
-                                    </Animated.View>
-                                </View>
-                            </View>
-                </Pressable>
+            <Animated.View
+                style={[styles.bg, { height: animatedHeight, paddingTop: animatedPaddingBottom }]}
+                {...panResponder.panHandlers}
+            >
+                <View style={styles.row}>
+                    <Animated.Text style={[styles.money, { fontSize: animatedFontSize }]}>
+                        {displayMoney(MONEY_AMOUNT, false)}
+                    </Animated.Text>
+                    <View style={styles.chevronContainer}>
+                        <Animated.View style={{ transform: [{ rotate: animatedRotate }] }}>
+                            <FontAwesomeIcon
+                                icon={faChevronRight as IconProp}
+                            />
+                        </Animated.View>
+                    </View>
+                </View>
             </Animated.View>
-            <View style={styles.subHaggleContainer}>
-                <Pressable style={styles.subHaggleBtn}>
-                    <Text>Counter</Text>
-                </Pressable>
-                <Pressable style={styles.subHaggleBtn}>
-                    <Text>Accept</Text>
-                </Pressable>
-            </View>
+            <Animated.View
+                style={[
+                    styles.subHaggleContainer,
+                    {
+                        opacity: animatedSubOpacity,
+                        transform: [{ translateY: animatedSubTranslateY }],
+                    },
+                ]}
+                {...panResponder.panHandlers}
+            >
+                {showAddTime && (
+                    <Pressable
+                        style={styles.addTimeRow}
+                        onPress={() => setShowAddTime(false)}
+                    >
+                        <FontAwesomeIcon
+                            icon={faClock as IconProp}
+                            style={styles.addTimeIcon}
+                        />
+                        <Text style={styles.addTimeText}>Add Time</Text>
+                    </Pressable>
+                )}
+                <View style={styles.subHaggleButtonsRow}>
+                    <Pressable style={styles.subHaggleBtn}>
+                        <Text>Counter</Text>
+                    </Pressable>
+                    <Pressable style={styles.subHaggleBtn}>
+                        <Text>Accept</Text>
+                    </Pressable>
+                </View>
+            </Animated.View>
         </>
     )
 }
@@ -99,7 +206,8 @@ const styles = StyleSheet.create({
     },
     subHaggleContainer: {
         display: "flex",
-        flexDirection: "row",
+        flexDirection: "column",
+        zIndex: -1,
     },
     subHaggleBtn: {
         width: "50%",
@@ -112,14 +220,30 @@ const styles = StyleSheet.create({
     money: {
         fontSize: 40,
         fontFamily: 'Koulen',
+    //    backgroundColor: "#EDEDED",
+    },
+    addTimeRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 14,
         backgroundColor: "#EDEDED",
+    },
+    addTimeIcon: {
+        marginRight: 10,
+    },
+    addTimeText: {
+        fontSize: 24,
+    },
+    subHaggleButtonsRow: {
+        flexDirection: "row",
     },
     row: {
         display: "flex",
         flexDirection: "row",
     },
     chevronContainer: {
-        backgroundColor:"blue",
+    //    backgroundColor:"blue",
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
