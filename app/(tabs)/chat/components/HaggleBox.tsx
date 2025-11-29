@@ -1,17 +1,17 @@
 
+import tools from '@/app/static/tools'
 import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faChevronRight, faClock } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { useMemo, useRef, useState } from "react"
 import { Animated, PanResponder, Pressable, StyleSheet, Text, View } from "react-native"
-import tools from '@/app/static/tools'
 const { displayMoney } = tools
 
 
 export default function HaggleBox() {
     const [ dealStarted, setDealStarted ] = useState(false)
-    const [ isCollapsed, setIsCollapsed ] = useState(false)
-    const [ showAddTime, setShowAddTime ] = useState(true)
+    const [ , setIsCollapsed ] = useState(false)
+    const [ showAddTime ] = useState(true)
     const animationController = useRef(new Animated.Value(0)).current
     const gestureStartValue = useRef(0)
 
@@ -124,6 +124,11 @@ export default function HaggleBox() {
         outputRange: [0, -150],
     })
 
+    const animatedSubHeight = visualProgress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [110, 0],
+    })
+
     const animatedSubOpacity = visualProgress.interpolate({
         inputRange: [0, 1],
         outputRange: [1, 1],
@@ -137,7 +142,7 @@ export default function HaggleBox() {
     const MONEY_AMOUNT = 800
 
     return (
-        <View style={styles.haggle}>
+        <View style={styles.wrapper}>
             <Animated.View
                 style={[styles.bg, { height: animatedHeight, paddingTop: animatedPaddingBottom }]}
                 {...panResponder.panHandlers}
@@ -160,6 +165,7 @@ export default function HaggleBox() {
                     styles.subHaggleContainer,
                     {
                         opacity: animatedSubOpacity,
+                        height: animatedSubHeight,
                         transform: [{ translateY: animatedSubTranslateY }],
                     },
                 ]}
@@ -191,6 +197,9 @@ export default function HaggleBox() {
 
 
 const styles = StyleSheet.create({
+    wrapper: {
+        position: "relative",
+    },
     bg: {
         backgroundColor: "#00CB4E",
         display: "flex",
@@ -212,6 +221,7 @@ const styles = StyleSheet.create({
         display: "flex",
         flexDirection: "column",
         zIndex: -1,
+        overflow: "hidden",
     },
     subHaggleBtn: {
         width: "50%",
@@ -253,7 +263,4 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingTop: 25,
     },
-    haggle: {
-        position: "absolute",
-    }
 })

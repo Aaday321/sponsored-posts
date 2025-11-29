@@ -1,4 +1,5 @@
 import {View, Text, StyleSheet, Pressable} from "react-native"
+import HaggleBox from "@/app/(tabs)/chat/components/HaggleBox"
 
 export default function Chat() {
 
@@ -7,20 +8,25 @@ export default function Chat() {
     }
 
     return (
-        <View style={styles.bg}>
-            <Text style={styles.text}>Chat</Text>
-            <Pressable style={styles.btn} onPress={handlePress}>
-                <Text>Press Me</Text>
-            </Pressable>
-        </View>
+        <>
+            <HaggleBox/>
+            <View style={styles.bg}>
+                <Text style={styles.text}>Chat</Text>
+                <Pressable style={styles.btn} onPress={handlePress}>
+                    <Text>Presssdsf Me</Text>
+                </Pressable>
+            </View>
+        </>
     )
 }
 
 
 const styles = StyleSheet.create({
     bg: {
-        backgroundColor: "black",
+        backgroundColor: "blue",
         height: "100%",
+        flexGrow: 1,
+
     },
     text: {
         marginTop: 50,
