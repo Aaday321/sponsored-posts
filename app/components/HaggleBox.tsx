@@ -4,7 +4,7 @@ import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faChevronRight, faClock } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react"
-import { Animated, PanResponder, Pressable, StyleSheet, Text, View } from "react-native"
+import { Animated, PanResponder, Platform, Pressable, StyleSheet, Text, View } from "react-native"
 const { displayMoney } = tools
 
 export interface HaggleBoxRef {
@@ -203,7 +203,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
 
     const animatedPaddingBottom = visualProgress.interpolate({
         inputRange: [0, 1],
-        outputRange: [45, 0],
+        outputRange: [Platform.OS === 'web' ? 200 : 45, 0],
     })
 
     const animatedSubTranslateY = visualProgress.interpolate({
@@ -289,6 +289,10 @@ const styles = StyleSheet.create({
     wrapper: {
         position: "relative",
         overflow: "hidden",
+        ...(Platform.OS === 'web' && {
+            marginTop: -44, // Compensate for safe area insets on web
+            paddingTop: 0,
+        }),
     },
     bg: {
         backgroundColor: "#00CB4E",
