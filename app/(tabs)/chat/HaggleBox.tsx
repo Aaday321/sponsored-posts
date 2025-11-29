@@ -111,7 +111,7 @@ export default function HaggleBox() {
 
     const animatedFontSize = visualProgress.interpolate({
         inputRange: [0, 1],
-        outputRange: [70, 28],
+        outputRange: [80, 28],
     })
 
     const animatedPaddingBottom = visualProgress.interpolate({
@@ -129,10 +129,15 @@ export default function HaggleBox() {
         outputRange: [1, 1],
     })
 
+    const animatedCheveronPadding =visualProgress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [25, 0],
+    })
+
     const MONEY_AMOUNT = 800
 
     return (
-        <>
+        <View style={styles.haggle}>
             <Animated.View
                 style={[styles.bg, { height: animatedHeight, paddingTop: animatedPaddingBottom }]}
                 {...panResponder.panHandlers}
@@ -141,13 +146,13 @@ export default function HaggleBox() {
                     <Animated.Text style={[styles.money, { fontSize: animatedFontSize }]}>
                         {displayMoney(MONEY_AMOUNT, false)}
                     </Animated.Text>
-                    <View style={styles.chevronContainer}>
+                    <Animated.View style={[styles.chevronContainer, { paddingTop: animatedCheveronPadding }]}>
                         <Animated.View style={{ transform: [{ rotate: animatedRotate }] }}>
                             <FontAwesomeIcon
                                 icon={faChevronRight as IconProp}
                             />
                         </Animated.View>
-                    </View>
+                    </Animated.View>
                 </View>
             </Animated.View>
             <Animated.View
@@ -163,7 +168,6 @@ export default function HaggleBox() {
                 {showAddTime && (
                     <Pressable
                         style={styles.addTimeRow}
-                        onPress={() => setShowAddTime(false)}
                     >
                         <FontAwesomeIcon
                             icon={faClock as IconProp}
@@ -181,7 +185,7 @@ export default function HaggleBox() {
                     </Pressable>
                 </View>
             </Animated.View>
-        </>
+        </View>
     )
 }
 
@@ -220,7 +224,7 @@ const styles = StyleSheet.create({
     money: {
         fontSize: 40,
         fontFamily: 'Koulen',
-    //    backgroundColor: "#EDEDED",
+    //    backgroundColor: "white",
     },
     addTimeRow: {
         flexDirection: "row",
@@ -247,5 +251,9 @@ const styles = StyleSheet.create({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        paddingTop: 25,
     },
+    haggle: {
+        position: "absolute",
+    }
 })
