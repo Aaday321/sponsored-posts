@@ -1,6 +1,5 @@
 import { Platform, StyleSheet } from 'react-native'
-import Chat from "@/app/(tabs)/chat"
-import HaggleBox from "@/app/(tabs)/chat/components/HaggleBox"
+import HaggleBox from "@/app/components/HaggleBox"
 
 export default function HomeScreen() {
   return (

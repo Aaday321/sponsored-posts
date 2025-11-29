@@ -213,7 +213,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
 
     const animatedSubHeight = visualProgress.interpolate({
         inputRange: [0, 1],
-        outputRange: [110, 0],
+        outputRange: [120, 0],
     })
 
     const animatedSubOpacity = visualProgress.interpolate({
@@ -284,12 +284,11 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
 
 HaggleBox.displayName = 'HaggleBox'
 
-export default HaggleBox
-
 
 const styles = StyleSheet.create({
     wrapper: {
         position: "relative",
+        overflow: "hidden",
     },
     bg: {
         backgroundColor: "#00CB4E",
@@ -311,8 +310,10 @@ const styles = StyleSheet.create({
     subHaggleContainer: {
         display: "flex",
         flexDirection: "column",
-        zIndex: -1,
         overflow: "hidden",
+        backgroundColor: "#EDEDED",
+        marginTop: 0,
+        zIndex: -1,
     },
     subHaggleBtn: {
         width: "50%",
@@ -325,7 +326,7 @@ const styles = StyleSheet.create({
     money: {
         fontSize: 40,
         fontFamily: 'Koulen',
-    //    backgroundColor: "white",
+        //    backgroundColor: "white",
     },
     addTimeRow: {
         flexDirection: "row",
@@ -348,10 +349,12 @@ const styles = StyleSheet.create({
         flexDirection: "row",
     },
     chevronContainer: {
-    //    backgroundColor:"blue",
+        //    backgroundColor:"blue",
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         paddingTop: 25,
     },
 })
+
+export default HaggleBox

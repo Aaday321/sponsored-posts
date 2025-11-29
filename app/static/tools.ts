@@ -6,7 +6,6 @@ function displayMoney(money: number, showDecimal: boolean) {
         })}`
         : `$${Number(money).toLocaleString()}`
 }
-
 export default ({
     displayMoney
 })
