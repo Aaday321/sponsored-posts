@@ -3,17 +3,42 @@ import tools from '@/app/static/tools'
 import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faChevronRight, faClock } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-import { useMemo, useRef, useState } from "react"
+import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { Animated, PanResponder, Pressable, StyleSheet, Text, View } from "react-native"
 const { displayMoney } = tools
 
+export interface HaggleBoxRef {
+    collapse: () => void
+    expand: () => void
+    startDrag: () => void
+    updateDrag: (dy: number) => void
+    endDrag: (dy: number, vy: number) => void
+}
 
-export default function HaggleBox() {
+const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     const [ dealStarted, setDealStarted ] = useState(false)
     const [ , setIsCollapsed ] = useState(false)
     const [ showAddTime ] = useState(true)
     const animationController = useRef(new Animated.Value(0)).current
     const gestureStartValue = useRef(0)
+
+    const collapse = () => {
+        setIsCollapsed(true)
+        Animated.timing(animationController, {
+            toValue: 1,
+            duration: 250,
+            useNativeDriver: false,
+        }).start()
+    }
+
+    const expand = () => {
+        setIsCollapsed(false)
+        Animated.timing(animationController, {
+            toValue: 0,
+            duration: 250,
+            useNativeDriver: false,
+        }).start()
+    }
 
     const toggleCollapsed = () => {
         let nextCollapsed
@@ -29,6 +54,68 @@ export default function HaggleBox() {
         }).start()
 
     }
+
+    const startDrag = () => {
+        animationController.stopAnimation((value: number) => {
+            gestureStartValue.current = value
+        })
+    }
+
+    const updateDrag = (dy: number) => {
+        // Allow some over-drag past 0/1 with a rubber-band effect
+        const raw = gestureStartValue.current - dy / 200
+
+        let newValue = raw
+        if (raw < 0) {
+            // Ease out as you pull past fully expanded
+            newValue = -Math.atan(-raw) / (Math.PI / 2)
+        } else if (raw > 1) {
+            // Ease out as you pull past fully collapsed
+            const over = raw - 1
+            newValue = 1 + Math.atan(over) / (Math.PI / 2)
+        }
+
+        animationController.setValue(newValue)
+    }
+
+    const endDrag = (dy: number, vy: number) => {
+        // Treat tiny movement as a tap
+        if (Math.abs(dy) < 5 && Math.abs(vy) < 0.3) {
+            toggleCollapsed()
+            return
+        }
+
+        // Flicks: decide based mainly on velocity
+        if (Math.abs(vy) > 1) {
+            const shouldCollapse = vy < 0 // flick up = collapse
+            setIsCollapsed(shouldCollapse)
+            Animated.timing(animationController, {
+                toValue: shouldCollapse ? 1 : 0,
+                duration: 180,
+                useNativeDriver: false,
+            }).start()
+            return
+        }
+
+        const rawValue = gestureStartValue.current - dy / 200
+        const clampedValue = Math.max(0, Math.min(1, rawValue))
+        const shouldCollapse = clampedValue > 0.5
+
+        setIsCollapsed(shouldCollapse)
+        Animated.timing(animationController, {
+            toValue: shouldCollapse ? 1 : 0,
+            duration: 200,
+            useNativeDriver: false,
+        }).start()
+    }
+
+    useImperativeHandle(ref, () => ({
+        collapse,
+        expand,
+        startDrag,
+        updateDrag,
+        endDrag,
+    }))
 
     const panResponder = useMemo(
         () =>
@@ -193,7 +280,11 @@ export default function HaggleBox() {
             </Animated.View>
         </View>
     )
-}
+})
+
+HaggleBox.displayName = 'HaggleBox'
+
+export default HaggleBox
 
 
 const styles = StyleSheet.create({
