@@ -2,8 +2,9 @@ import ChatInput from "@/app/components/ChatInput"
 import HaggleBox, { type HaggleBoxRef } from "@/app/components/HaggleBox"
 import { type MessageData } from "@/app/components/Message"
 import MessageList from "@/app/components/MessageList"
+import { LinearGradient } from "expo-linear-gradient"
 import { useRef, useState } from "react"
-import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native"
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native"
 
 export default function Chat() {
     const haggleBoxRef = useRef<HaggleBoxRef>(null)
@@ -137,21 +138,45 @@ export default function Chat() {
     ])
 
     return (
-        <>
+        <View style={styles.screen}>
             <HaggleBox ref={haggleBoxRef} />
-            <KeyboardAvoidingView
-                style={styles.container}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-            >
-                <MessageList messages={messages} />
-                <ChatInput />
-            </KeyboardAvoidingView>
-        </>
+            <View style={styles.chatWrapper}>
+                <LinearGradient
+                    colors={['rgba(0, 0, 0, 0.2)', 'rgba(0, 0, 0, 0.15)', 'rgba(0, 0, 0, 0.1)', 'rgba(0, 0, 0, 0.05)', 'transparent']}
+                    locations={[0, 0.25, 0.5, 0.75, 1]}
+                    style={styles.insetShadowContainer}
+                    pointerEvents="none"
+                />
+                <KeyboardAvoidingView
+                    style={styles.container}
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+                >
+                    <MessageList messages={messages} />
+                    <ChatInput />
+                </KeyboardAvoidingView>
+            </View>
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
+    screen: {
+        flex: 1,
+        backgroundColor: "#FFFFFF",
+    },
+    chatWrapper: {
+        flex: 1,
+        position: "relative",
+    },
+    insetShadowContainer: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 12,
+        zIndex: 1,
+    },
     container: {
         flex: 1,
         backgroundColor: "#FFFFFF",
