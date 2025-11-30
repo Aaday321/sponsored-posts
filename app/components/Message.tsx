@@ -29,6 +29,7 @@ export default function Message({ message }: MessageProps) {
                 <PriceBubble
                     price={message.price!}
                     timestamp={message.timestamp}
+                    isFromUser={message.isFromUser}
                 />
             ) : (
                 <TextBubble

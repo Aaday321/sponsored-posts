@@ -44,7 +44,6 @@ export default function MessageList({ messages }: MessageListProps) {
             onScroll={handleScroll}
             onScrollEndDrag={handleScrollEndDrag}
             onMomentumScrollEnd={handleScrollEndDrag}
-            scrollEventThrottle={16}
             keyboardShouldPersistTaps="handled"
         >
             {messages.map((message) => (
