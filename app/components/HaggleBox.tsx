@@ -3,6 +3,7 @@ import tools from '@/app/static/tools'
 import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faChevronRight, faClock } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
+import { LinearGradient } from "expo-linear-gradient"
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { Animated, PanResponder, Platform, Pressable, StyleSheet, Text, View } from "react-native"
 const { displayMoney } = tools
@@ -22,12 +23,18 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     const animationController = useRef(new Animated.Value(0)).current
     const gestureStartValue = useRef(0)
 
+    // Custom easing function: ease-out cubic
+    const customEasing = (t: number): number => {
+       return t
+    }
+
     const collapse = () => {
         setIsCollapsed(true)
         Animated.timing(animationController, {
             toValue: 1,
             duration: 250,
             useNativeDriver: false,
+            easing: customEasing,
         }).start()
     }
 
@@ -37,6 +44,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
             toValue: 0,
             duration: 250,
             useNativeDriver: false,
+            easing: customEasing,
         }).start()
     }
 
@@ -51,6 +59,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
             toValue: nextCollapsed ? 1 : 0,
             duration: 250,
             useNativeDriver: false, // we animate height, so must be false
+            easing: customEasing,
         }).start()
 
     }
@@ -93,6 +102,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                 toValue: shouldCollapse ? 1 : 0,
                 duration: 180,
                 useNativeDriver: false,
+                easing: customEasing,
             }).start()
             return
         }
@@ -106,6 +116,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
             toValue: shouldCollapse ? 1 : 0,
             duration: 200,
             useNativeDriver: false,
+            easing: customEasing,
         }).start()
     }
 
@@ -134,7 +145,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                     let newValue = raw
                     if (raw < 0) {
                         // Ease out as you pull past fully expanded
-                        newValue = -Math.atan(-raw) / (Math.PI / 2)
+                        newValue = -Math.atan(-raw) / (Math.PI / 2.5)
                     } else if (raw > 1) {
                         // Ease out as you pull past fully collapsed
                         const over = raw - 1
@@ -158,6 +169,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                             toValue: shouldCollapse ? 1 : 0,
                             duration: 180,
                             useNativeDriver: false,
+                            easing: customEasing,
                         }).start()
                         return
                     }
@@ -171,6 +183,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                         toValue: shouldCollapse ? 1 : 0,
                         duration: 200,
                         useNativeDriver: false,
+                        easing: customEasing,
                     }).start()
                 },
             }),
@@ -185,10 +198,13 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
         extrapolate: "clamp",
     })
 
+    const ir = [-0.6, 0, 1, 1.6]
+    const or = [210, 160, 100, 70]
+
     const animatedHeight = animationController.interpolate({
         // Give the green bar more stretch past both ends
-        inputRange: [-0.6, 0, 1, 1.6],
-        outputRange: [210, 160, 100, 70],
+        inputRange: ir,
+        outputRange: or,
     })
 
     const animatedRotate = visualProgress.interpolate({
@@ -206,16 +222,12 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
         outputRange: [Platform.OS === 'web' ? 200 : 45, 0],
     })
 
-    const animatedSubTranslateY = visualProgress.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0, -150],
+    // Use animationController directly to allow rubberband movement
+    // Match the green section's height change: 160->210 = 50px increase when rubberbanding down
+    const animatedSubTranslateY = animationController.interpolate({
+        inputRange: [-0.6, 0, 1, 1.6],
+        outputRange: [50, 0, -175, -205], // Move down proportionally with green section stretch
     })
-
-    const animatedSubHeight = visualProgress.interpolate({
-        inputRange: [0, 1],
-        outputRange: [120, 0],
-    })
-
     const animatedSubOpacity = visualProgress.interpolate({
         inputRange: [0, 1],
         outputRange: [1, 1],
@@ -232,7 +244,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
         <View style={styles.wrapper}>
             <Animated.View
                 style={[styles.bg, { height: animatedHeight, paddingTop: animatedPaddingBottom }]}
-                {...panResponder.panHandlers}
+                { ...panResponder.panHandlers }
             >
                 <View style={styles.row}>
                     <Animated.Text style={[styles.money, { fontSize: animatedFontSize }]}>
@@ -247,12 +259,13 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                     </Animated.View>
                 </View>
             </Animated.View>
+            <>
             <Animated.View
                 style={[
                     styles.subHaggleContainer,
                     {
                         opacity: animatedSubOpacity,
-                        height: animatedSubHeight,
+                        height: 120,
                         transform: [{ translateY: animatedSubTranslateY }],
                     },
                 ]}
@@ -277,7 +290,17 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                         <Text>Accept</Text>
                     </Pressable>
                 </View>
+
+
+                <LinearGradient
+                    colors={['rgba(0, 0, 0, 0.2)', 'rgba(0, 0, 0, 0.15)', 'rgba(0, 0, 0, 0.1)', 'rgba(0, 0, 0, 0.05)', 'transparent']}
+                    locations={[0, 0.25, 0.5, 0.75, 1]}
+                    style={styles.insetShadowContainer}
+                    pointerEvents="none"
+                />
             </Animated.View>
+
+            </>
         </View>
     )
 })
@@ -288,11 +311,11 @@ HaggleBox.displayName = 'HaggleBox'
 const styles = StyleSheet.create({
     wrapper: {
         position: "relative",
-        overflow: "hidden",
         ...(Platform.OS === 'web' && {
             marginTop: -44, // Compensate for safe area insets on web
             paddingTop: 0,
         }),
+        backgroundColor: 'blue'
     },
     bg: {
         backgroundColor: "#00CB4E",
@@ -301,6 +324,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         fontWeight: "bold",
         fontSize: 100,
+        zIndex: 2,
     },
     text: {
         fontSize: 20,
@@ -314,10 +338,13 @@ const styles = StyleSheet.create({
     subHaggleContainer: {
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden",
         backgroundColor: "#EDEDED",
         marginTop: 0,
-        zIndex: -1,
+        position: "absolute",
+        bottom: 45,
+        top: 160,
+        left: 0,
+        zIndex: 1
     },
     subHaggleBtn: {
         width: "50%",
@@ -358,6 +385,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingTop: 25,
+    },
+
+    insetShadowContainer: {
+        top: -3,
+        left: 0,
+        right: 0,
+        height: 12,
+
+        position:'relative',
+        zIndex: -100
+
     },
 })
 

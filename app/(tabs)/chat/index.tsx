@@ -8,7 +8,7 @@ import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native"
 
 export default function Chat() {
     const haggleBoxRef = useRef<HaggleBoxRef>(null)
-    const [messages] = useState<MessageData[]>([
+    const [ messages ] = useState<MessageData[]>([
         {
             id: '1',
             type: 'price',
@@ -141,12 +141,6 @@ export default function Chat() {
         <View style={styles.screen}>
             <HaggleBox ref={haggleBoxRef} />
             <View style={styles.chatWrapper}>
-                <LinearGradient
-                    colors={['rgba(0, 0, 0, 0.2)', 'rgba(0, 0, 0, 0.15)', 'rgba(0, 0, 0, 0.1)', 'rgba(0, 0, 0, 0.05)', 'transparent']}
-                    locations={[0, 0.25, 0.5, 0.75, 1]}
-                    style={styles.insetShadowContainer}
-                    pointerEvents="none"
-                />
                 <KeyboardAvoidingView
                     style={styles.container}
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -168,14 +162,6 @@ const styles = StyleSheet.create({
     chatWrapper: {
         flex: 1,
         position: "relative",
-    },
-    insetShadowContainer: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 12,
-        zIndex: 1,
     },
     container: {
         flex: 1,
