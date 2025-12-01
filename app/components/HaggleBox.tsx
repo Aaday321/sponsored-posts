@@ -219,13 +219,10 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
         extrapolate: "clamp",
     })
 
-    const ir = [-0.6, 0, 1, 1.6]
-    const or = [210, 160, 100, 70]
-
     const animatedHeight = animationController.interpolate({
         // Give the green bar more stretch past both ends
-        inputRange: ir,
-        outputRange: or,
+        inputRange: [-0.6, 0, 1, 1.6],
+        outputRange: [210, 160, 100, 70],
     })
 
     const animatedRotate = visualProgress.interpolate({
