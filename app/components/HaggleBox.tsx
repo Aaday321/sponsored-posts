@@ -3,11 +3,20 @@ import tools from '@/app/static/tools'
 import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faChevronRight, faClock } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-import { LinearGradient } from "expo-linear-gradient"
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { Animated, PanResponder, Platform, Pressable, StyleSheet, Text, View } from "react-native"
 const { displayMoney } = tools
-
+const shadowSettings = {
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+}
+const shadowSettings2 = {
+    shadowColor: '#000',
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+}
 export interface HaggleBoxRef {
     collapse: () => void
     expand: () => void
@@ -23,6 +32,13 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     const animationController = useRef(new Animated.Value(0)).current
     const gestureStartValue = useRef(0)
 
+    // Animation duration constants
+    const DURATION_FLICK_EXPAND = 120
+    const DURATION_FLICK_COLLAPSE = 100
+    const DURATION_TAP_EXPAND = 250
+    const DURATION_TAP_COLLAPSE = 180
+    const DURATION_FOLLOW_FINGER = 100 //Speed of the rest of the animation
+
     // Custom easing function: ease-out cubic
     const customEasing = (t: number): number => {
        return t
@@ -32,7 +48,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
         setIsCollapsed(true)
         Animated.timing(animationController, {
             toValue: 1,
-            duration: 250,
+            duration: DURATION_FLICK_COLLAPSE,
             useNativeDriver: false,
             easing: customEasing,
         }).start()
@@ -42,7 +58,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
         setIsCollapsed(false)
         Animated.timing(animationController, {
             toValue: 0,
-            duration: 250,
+            duration: DURATION_FLICK_EXPAND,
             useNativeDriver: false,
             easing: customEasing,
         }).start()
@@ -55,9 +71,10 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
             return nextCollapsed
         })
 
+        const duration = nextCollapsed ? DURATION_TAP_COLLAPSE : DURATION_TAP_EXPAND
         Animated.timing(animationController, {
             toValue: nextCollapsed ? 1 : 0,
-            duration: 250,
+            duration,
             useNativeDriver: false, // we animate height, so must be false
             easing: customEasing,
         }).start()
@@ -98,15 +115,17 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
         if (Math.abs(vy) > 1) {
             const shouldCollapse = vy < 0 // flick up = collapse
             setIsCollapsed(shouldCollapse)
+            const duration = shouldCollapse ? DURATION_FLICK_COLLAPSE : DURATION_FLICK_EXPAND
             Animated.timing(animationController, {
                 toValue: shouldCollapse ? 1 : 0,
-                duration: 180,
+                duration,
                 useNativeDriver: false,
                 easing: customEasing,
             }).start()
             return
         }
 
+        // Follow finger: animate to nearest position
         const rawValue = gestureStartValue.current - dy / 200
         const clampedValue = Math.max(0, Math.min(1, rawValue))
         const shouldCollapse = clampedValue > 0.5
@@ -114,7 +133,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
         setIsCollapsed(shouldCollapse)
         Animated.timing(animationController, {
             toValue: shouldCollapse ? 1 : 0,
-            duration: 200,
+            duration: DURATION_FOLLOW_FINGER,
             useNativeDriver: false,
             easing: customEasing,
         }).start()
@@ -145,7 +164,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                     let newValue = raw
                     if (raw < 0) {
                         // Ease out as you pull past fully expanded
-                        newValue = -Math.atan(-raw) / (Math.PI / 2.5)
+                        newValue = -Math.atan(-raw) / (Math.PI / 2)
                     } else if (raw > 1) {
                         // Ease out as you pull past fully collapsed
                         const over = raw - 1
@@ -165,15 +184,17 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                     if (Math.abs(vy) > 1) {
                         const shouldCollapse = vy < 0 // flick up = collapse
                         setIsCollapsed(shouldCollapse)
+                        const duration = shouldCollapse ? DURATION_FLICK_COLLAPSE : DURATION_FLICK_EXPAND
                         Animated.timing(animationController, {
                             toValue: shouldCollapse ? 1 : 0,
-                            duration: 180,
+                            duration,
                             useNativeDriver: false,
                             easing: customEasing,
                         }).start()
                         return
                     }
 
+                    // Follow finger: animate to nearest position
                     const rawValue = gestureStartValue.current - dy / 200
                     const clampedValue = Math.max(0, Math.min(1, rawValue))
                     const shouldCollapse = clampedValue > 0.5
@@ -181,7 +202,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                     setIsCollapsed(shouldCollapse)
                     Animated.timing(animationController, {
                         toValue: shouldCollapse ? 1 : 0,
-                        duration: 200,
+                        duration: DURATION_FOLLOW_FINGER,
                         useNativeDriver: false,
                         easing: customEasing,
                     }).start()
@@ -226,7 +247,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     // Match the green section's height change: 160->210 = 50px increase when rubberbanding down
     const animatedSubTranslateY = animationController.interpolate({
         inputRange: [-0.6, 0, 1, 1.6],
-        outputRange: [50, 0, -175, -205], // Move down proportionally with green section stretch
+        outputRange: [50, 0, -180, -210], // Move down proportionally with green section stretch
     })
     const animatedSubOpacity = visualProgress.interpolate({
         inputRange: [0, 1],
@@ -238,12 +259,27 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
         outputRange: [25, 0],
     })
 
+    // Animate shadow opacity: stronger when between positions (during transition)
+    // Peaks at 0.35 in the middle, returns to 0.15 at extremes
+    const animatedShadowOpacity = visualProgress.interpolate({
+        inputRange: [0, 0.1, 0.5, 0.999, 1],
+        outputRange: [0, 0.25, 0.25, 0.25, 0],
+    })
+
     const MONEY_AMOUNT = 800
 
     return (
         <View style={styles.wrapper}>
-            <Animated.View
-                style={[styles.bg, { height: animatedHeight, paddingTop: animatedPaddingBottom }]}
+            <Animated.View // Gummy Green Section
+                style={[
+                    styles.bg,
+                    {
+                        height: animatedHeight,
+                        paddingTop: animatedPaddingBottom,
+                        ...shadowSettings2,
+                        shadowOpacity: animatedShadowOpacity,
+                    }
+                ]}
                 { ...panResponder.panHandlers }
             >
                 <View style={styles.row}>
@@ -290,14 +326,6 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                         <Text>Accept</Text>
                     </Pressable>
                 </View>
-
-
-                <LinearGradient
-                    colors={['rgba(0, 0, 0, 0.2)', 'rgba(0, 0, 0, 0.15)', 'rgba(0, 0, 0, 0.1)', 'rgba(0, 0, 0, 0.05)', 'transparent']}
-                    locations={[0, 0.25, 0.5, 0.75, 1]}
-                    style={styles.insetShadowContainer}
-                    pointerEvents="none"
-                />
             </Animated.View>
 
             </>
@@ -344,7 +372,9 @@ const styles = StyleSheet.create({
         bottom: 45,
         top: 160,
         left: 0,
-        zIndex: 1
+        zIndex: 1,
+
+            ...shadowSettings,
     },
     subHaggleBtn: {
         width: "50%",
@@ -385,17 +415,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingTop: 25,
-    },
-
-    insetShadowContainer: {
-        top: -3,
-        left: 0,
-        right: 0,
-        height: 12,
-
-        position:'relative',
-        zIndex: -100
-
     },
 })
 
