@@ -2,12 +2,13 @@ import ChatInput from "@/app/components/ChatInput"
 import HaggleBox, { type HaggleBoxRef } from "@/app/components/HaggleBox"
 import { type MessageData } from "@/app/components/Message"
 import MessageList from "@/app/components/MessageList"
+import { LinearGradient } from "expo-linear-gradient"
 import { useRef, useState } from "react"
-import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native"
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native"
 
 export default function Chat() {
     const haggleBoxRef = useRef<HaggleBoxRef>(null)
-    const [messages] = useState<MessageData[]>([
+    const [ messages ] = useState<MessageData[]>([
         {
             id: '1',
             type: 'price',
@@ -137,21 +138,31 @@ export default function Chat() {
     ])
 
     return (
-        <>
+        <View style={styles.screen}>
             <HaggleBox ref={haggleBoxRef} />
-            <KeyboardAvoidingView
-                style={styles.container}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-            >
-                <MessageList messages={messages} />
-                <ChatInput />
-            </KeyboardAvoidingView>
-        </>
+            <View style={styles.chatWrapper}>
+                <KeyboardAvoidingView
+                    style={styles.container}
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+                >
+                    <MessageList messages={messages} />
+                    <ChatInput />
+                </KeyboardAvoidingView>
+            </View>
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
+    screen: {
+        flex: 1,
+        backgroundColor: "#FFFFFF",
+    },
+    chatWrapper: {
+        flex: 1,
+        position: "relative",
+    },
     container: {
         flex: 1,
         backgroundColor: "#FFFFFF",
