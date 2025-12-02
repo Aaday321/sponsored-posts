@@ -4,8 +4,8 @@ import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faChevronRight, faClock } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react"
-import {Animated, PanResponder, Platform, Pressable, SafeAreaView, StyleSheet, Text, View} from "react-native"
-import {SafeAreaContext} from "react-native-safe-area-context";
+import {Animated, PanResponder, Platform, Pressable, StyleSheet, Text, View} from "react-native"
+import { SafeAreaView } from 'react-native-safe-area-context'
 const { displayMoney } = tools
 const shadowSettings = {
     shadowColor: '#000',
@@ -233,7 +233,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
 
     const animatedFontSize = visualProgress.interpolate({
         inputRange: [0, 1],
-        outputRange: [80, 28],
+        outputRange: [60, 28],
     })
 
     const animatedPaddingBottom = visualProgress.interpolate({
@@ -267,13 +267,13 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     const MONEY_AMOUNT = 800
 
     return (
-        <SafeAreaContext style={styles.wrapper}>
+        <SafeAreaView style={styles.wrapper}>
             <Animated.View // Gummy Green Section
                 style={[
                     styles.bg,
                     {
-                        height: animatedHeight,
-                        paddingTop: animatedPaddingBottom,
+                       // height: animatedHeight,
+                       // paddingTop: animatedPaddingBottom,
                         ...shadowSettings2,
                         shadowOpacity: animatedShadowOpacity,
                     }
@@ -281,10 +281,14 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                 { ...panResponder.panHandlers }
             >
                 <View style={styles.row}>
-                    <Animated.Text style={[styles.money, { fontSize: animatedFontSize }]}>
+                    <Animated.Text
+                       style={[styles.money, { fontSize: animatedFontSize }]}
+                    >
                         {displayMoney(MONEY_AMOUNT, false)}
                     </Animated.Text>
-                    <Animated.View style={[styles.chevronContainer, { paddingTop: animatedCheveronPadding }]}>
+                    <Animated.View style={[styles.chevronContainer, {
+                       // paddingTop: animatedCheveronPadding
+                    }]}>
                         <Animated.View style={{ transform: [{ rotate: animatedRotate }] }}>
                             <FontAwesomeIcon
                                 icon={faChevronRight as IconProp}
@@ -327,7 +331,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
             </Animated.View>
 
             </>
-        </SafeAreaContext>
+        </SafeAreaView>
     )
 })
 
@@ -336,15 +340,10 @@ HaggleBox.displayName = 'HaggleBox'
 
 const styles = StyleSheet.create({
     wrapper: {
-        position: "relative",
-        ...(Platform.OS === 'web' && {
-            marginTop: -44, // Compensate for safe area insets on web
-            paddingTop: 0,
-        }),
-        backgroundColor: 'blue'
+
+        bacgroundColor: "#00a651",
     },
     bg: {
-        backgroundColor: "#00CB4E",
         display: "flex",
         justifyContent: "flex-end",
         alignItems: "center",
@@ -406,13 +405,13 @@ const styles = StyleSheet.create({
     row: {
         display: "flex",
         flexDirection: "row",
+        backgroundColor: "#632424",
     },
     chevronContainer: {
         //    backgroundColor:"blue",
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingTop: 25,
     },
 })
 

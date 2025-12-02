@@ -7,6 +7,7 @@ import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { Platform } from 'react-native'
 import 'react-native-reanimated'
+import {SafeAreaProvider} from "react-native-safe-area-context";
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -22,14 +23,16 @@ export default function RootLayout() {
   const queryClient = new QueryClient()
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-            <QueryClientProvider client={queryClient}>
-              <Stack>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-              </Stack>
-              {Platform.OS !== 'web' && <StatusBar style="auto" />}
-            </QueryClientProvider>
-    </ThemeProvider>
+   <SafeAreaProvider>
+     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+             <QueryClientProvider client={queryClient}>
+               <Stack>
+                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                 <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+               </Stack>
+               {Platform.OS !== 'web' && <StatusBar style="auto" />}
+             </QueryClientProvider>
+     </ThemeProvider>
+   </SafeAreaProvider>
   )
 }
