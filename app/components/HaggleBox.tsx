@@ -4,7 +4,8 @@ import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faChevronRight, faClock } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react"
-import { Animated, PanResponder, Platform, Pressable, StyleSheet, Text, View } from "react-native"
+import {Animated, PanResponder, Platform, Pressable, SafeAreaView, StyleSheet, Text, View} from "react-native"
+import {SafeAreaContext} from "react-native-safe-area-context";
 const { displayMoney } = tools
 const shadowSettings = {
     shadowColor: '#000',
@@ -266,7 +267,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     const MONEY_AMOUNT = 800
 
     return (
-        <View style={styles.wrapper}>
+        <SafeAreaContext style={styles.wrapper}>
             <Animated.View // Gummy Green Section
                 style={[
                     styles.bg,
@@ -326,7 +327,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
             </Animated.View>
 
             </>
-        </View>
+        </SafeAreaContext>
     )
 })
 
