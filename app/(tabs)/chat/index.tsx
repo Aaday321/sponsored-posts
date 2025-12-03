@@ -162,6 +162,7 @@ const styles = StyleSheet.create({
     chatWrapper: {
         flex: 1,
         position: "relative",
+        zIndex: 0,
     },
     container: {
         flex: 1,

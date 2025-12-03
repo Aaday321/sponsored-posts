@@ -245,7 +245,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     // Match the green section's height change: 160->210 = 50px increase when rubberbanding down
     const animatedSubTranslateY = animationController.interpolate({
         inputRange: [-0.6, 0, 1, 1.6],
-        outputRange: [50, 0, -180, -210], // Move down proportionally with green section stretch
+        outputRange: [50, 0, -280, -210], // Move down proportionally with green section stretch
     })
     const animatedSubOpacity = visualProgress.interpolate({
         inputRange: [0, 1],
@@ -255,6 +255,11 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     const animatedCheveronPadding =visualProgress.interpolate({
         inputRange: [0, 1],
         outputRange: [25, 0],
+    })
+
+    const animatedTop = visualProgress.interpolate({
+        inputRange: [-0.6, 0, 1, 1.6],
+        outputRange: [-20, 0, -20, -50],
     })
 
     // Animate shadow opacity: stronger when between positions (during transition)
@@ -267,71 +272,78 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     const MONEY_AMOUNT = 800
 
     return (
-        <SafeAreaView style={styles.wrapper}>
-            <Animated.View // Gummy Green Section
-                style={[
-                    styles.bg,
-                    {
-                       // height: animatedHeight,
-                       // paddingTop: animatedPaddingBottom,
-                        ...shadowSettings2,
-                        shadowOpacity: animatedShadowOpacity,
-                    }
-                ]}
-                { ...panResponder.panHandlers }
-            >
-                <View style={styles.row}>
-                    <Animated.Text
-                       style={[styles.money, { fontSize: animatedFontSize }]}
-                    >
-                        {displayMoney(MONEY_AMOUNT, false)}
-                    </Animated.Text>
-                    <Animated.View style={[styles.chevronContainer, {
-                       // paddingTop: animatedCheveronPadding
-                    }]}>
-                        <Animated.View style={{ transform: [{ rotate: animatedRotate }] }}>
-                            <FontAwesomeIcon
-                                icon={faChevronRight as IconProp}
-                            />
-                        </Animated.View>
-                    </Animated.View>
-                </View>
-            </Animated.View>
-            <>
-            <Animated.View
-                style={[
-                    styles.subHaggleContainer,
-                    {
-                        opacity: animatedSubOpacity,
-                        height: 120,
-                        transform: [{ translateY: animatedSubTranslateY }],
-                    },
-                ]}
-                {...panResponder.panHandlers}
-            >
-                {showAddTime && (
-                    <Pressable
-                        style={styles.addTimeRow}
-                    >
-                        <FontAwesomeIcon
-                            icon={faClock as IconProp}
-                            style={styles.addTimeIcon}
-                        />
-                        <Text style={styles.addTimeText}>Add Time</Text>
-                    </Pressable>
-                )}
-                <View style={styles.subHaggleButtonsRow}>
-                    <Pressable style={styles.subHaggleBtn}>
-                        <Text>Counter</Text>
-                    </Pressable>
-                    <Pressable style={styles.subHaggleBtn}>
-                        <Text>Accept</Text>
-                    </Pressable>
-                </View>
-            </Animated.View>
+        <>
+            <SafeAreaView>
+                <Animated.View // Gummy Green Section
+                    style={[
+                        styles.bg,
+                        {
+                           // height: animatedHeight,
+                           // paddingTop: animatedPaddingBottom,
+                            ...shadowSettings2,
+                            shadowOpacity: animatedShadowOpacity,
+                         //   position: 'relative',
+                          //  top: animatedTop,
+                         //   bottom: animatedTop,
+                         //   left: 0,
 
-            </>
-        </SafeAreaView>
+                        }
+                    ]}
+                    { ...panResponder.panHandlers }
+                >
+                    <View style={styles.row}>
+                        <Animated.Text
+                           style={[styles.money, { fontSize: animatedFontSize }]}
+                        >
+                            {displayMoney(MONEY_AMOUNT, false)}
+                        </Animated.Text>
+                        <Animated.View style={[styles.chevronContainer, {
+                           // paddingTop: animatedCheveronPadding
+                        }]}>
+                            <Animated.View style={{ transform: [{ rotate: animatedRotate }] }}>
+                                <FontAwesomeIcon
+                                    icon={faChevronRight as IconProp}
+                                />
+                            </Animated.View>
+                        </Animated.View>
+                    </View>
+                </Animated.View>
+                <>
+                <Animated.View
+                    style={[
+                        styles.subHaggleContainer,
+                        {
+                            opacity: animatedSubOpacity,
+                         //   height: 120,
+                            transform: [{ translateY: animatedSubTranslateY }],
+                        },
+                    ]}
+                    {...panResponder.panHandlers}
+                >
+                    {showAddTime && (
+                        <Pressable
+                            style={styles.addTimeRow}
+                        >
+                            <FontAwesomeIcon
+                                icon={faClock as IconProp}
+                                style={styles.addTimeIcon}
+                            />
+                            <Text style={styles.addTimeText}>Add Time</Text>
+                        </Pressable>
+                    )}
+                    <View style={styles.subHaggleButtonsRow}>
+                        <Pressable style={styles.subHaggleBtn}>
+                            <Text>Counter</Text>
+                        </Pressable>
+                        <Pressable style={styles.subHaggleBtn}>
+                            <Text>Accept</Text>
+                        </Pressable>
+                    </View>
+                </Animated.View>
+
+                </>
+            </SafeAreaView>
+        </>
     )
 })
 
@@ -340,8 +352,9 @@ HaggleBox.displayName = 'HaggleBox'
 
 const styles = StyleSheet.create({
     wrapper: {
-
-        bacgroundColor: "#00a651",
+        backgroundColor: "red",
+        zIndex: 3,
+        flexGrow: 1,
     },
     bg: {
         display: "flex",
@@ -350,36 +363,32 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         fontSize: 100,
         zIndex: 2,
+        backgroundColor: 'yellow',
     },
     text: {
         fontSize: 20,
         fontFamily: 'Koulen',
-    },
-    centerContent: {
-        flex: 1,
-        justifyContent: "flex-end",
-        alignItems: "center",
     },
     subHaggleContainer: {
         display: "flex",
         flexDirection: "column",
         backgroundColor: "#EDEDED",
         marginTop: 0,
-        position: "absolute",
+        position: "relative",
         bottom: 45,
-        top: 160,
+        top: 0,
         left: 0,
-        zIndex: 1,
+        zIndex: -10, //1
+        //display: 'none',
 
             ...shadowSettings,
     },
     subHaggleBtn: {
         width: "50%",
-        display: 'flex',
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "#EDEDED",
-        paddingBlock: 20
+        paddingBlock: 20,
     },
     money: {
         fontSize: 40,
@@ -405,7 +414,7 @@ const styles = StyleSheet.create({
     row: {
         display: "flex",
         flexDirection: "row",
-        backgroundColor: "#632424",
+        backgroundColor: "#EDEDED",
     },
     chevronContainer: {
         //    backgroundColor:"blue",
