@@ -37,7 +37,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     const DURATION_FLICK_EXPAND = 120
     const DURATION_FLICK_COLLAPSE = 100
     const DURATION_TAP_EXPAND = 250
-    const DURATION_TAP_COLLAPSE = 180
+    const DURATION_TAP_COLLAPSE = 120
     const DURATION_FOLLOW_FINGER = 100 //Speed of the rest of the animation
 
     // Custom easing function: ease-out cubic
@@ -428,8 +428,8 @@ const styles = StyleSheet.create({
         display: "flex",
         flexDirection: "row",
         //backgroundColor: "#EDEDED",
-        position: "relative",
-        top: 3
+      //  position: "relative",
+      //  top: 3
     },
     chevronContainer: {
         //backgroundColor:"blue",
