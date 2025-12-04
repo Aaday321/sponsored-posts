@@ -223,7 +223,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     const animatedHeight = animationController.interpolate({
         // Give the green bar more stretch past both ends
         inputRange: [-0.6, 0, 1, 1.6],
-        outputRange: [210, 160, 100, 70],
+        outputRange: [210, 100, 60, 70],
     })
 
     const animatedRotate = visualProgress.interpolate({
@@ -245,7 +245,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     // Match the green section's height change: 160->210 = 50px increase when rubberbanding down
     const animatedSubTranslateY = animationController.interpolate({
         inputRange: [-0.6, 0, 1, 1.6],
-        outputRange: [50, 0, -280, -210], // Move down proportionally with green section stretch
+        outputRange: [45, 45, -70, -210], // Move down proportionally with green section stretch
     })
     const animatedSubOpacity = visualProgress.interpolate({
         inputRange: [0, 1],
@@ -278,7 +278,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                     style={[
                         styles.bg,
                         {
-                           // height: animatedHeight,
+                            height: animatedHeight,
                            // paddingTop: animatedPaddingBottom,
                             ...shadowSettings2,
                             shadowOpacity: animatedShadowOpacity,
@@ -363,7 +363,8 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         fontSize: 100,
         zIndex: 2,
-        backgroundColor: 'yellow',
+        backgroundColor: '#00CB4E',
+        opacity: 0.5,
     },
     text: {
         fontSize: 20,
@@ -372,11 +373,10 @@ const styles = StyleSheet.create({
     subHaggleContainer: {
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#EDEDED",
+        backgroundColor: "red",
         marginTop: 0,
         position: "relative",
         bottom: 45,
-        top: 0,
         left: 0,
         zIndex: -10, //1
         //display: 'none',
@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
         width: "50%",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#EDEDED",
+      //  backgroundColor: "#EDEDED",
         paddingBlock: 20,
     },
     money: {
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         paddingVertical: 14,
-        backgroundColor: "#EDEDED",
+     //   backgroundColor: "#EDEDED",
     },
     addTimeIcon: {
         marginRight: 10,
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
     row: {
         display: "flex",
         flexDirection: "row",
-        backgroundColor: "#EDEDED",
+    //    backgroundColor: "#EDEDED",
     },
     chevronContainer: {
         //    backgroundColor:"blue",
