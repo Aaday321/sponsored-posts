@@ -233,7 +233,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
 
     const animatedFontSize = visualProgress.interpolate({
         inputRange: [0, 1],
-        outputRange: [60, 28],
+        outputRange: [55, 28],
     })
 
     const animatedPaddingBottom = visualProgress.interpolate({
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
     //    backgroundColor: "#EDEDED",
     },
     chevronContainer: {
-            backgroundColor:"blue",
+        //backgroundColor:"blue",
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
