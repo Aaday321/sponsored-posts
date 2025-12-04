@@ -300,7 +300,10 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                         <Animated.View style={[styles.chevronContainer, {
                            // paddingTop: animatedCheveronPadding
                         }]}>
-                            <Animated.View style={{ transform: [{ rotate: animatedRotate }] }}>
+                            <Animated.View style={{
+                                transform: [{ rotate: animatedRotate }],
+                                //  backgroundColor: 'blue'
+                            }}>
                                 <FontAwesomeIcon
                                     icon={faChevronRight as IconProp}
                                 />
@@ -358,7 +361,7 @@ const styles = StyleSheet.create({
     },
     bg: {
         display: "flex",
-        justifyContent: "flex-end",
+        justifyContent: "center",
         alignItems: "center",
         fontWeight: "bold",
         fontSize: 100,
