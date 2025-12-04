@@ -5,7 +5,7 @@ import { faChevronRight, faClock } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react"
 import {Animated, PanResponder, Platform, Pressable, StyleSheet, Text, View} from "react-native"
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 const { displayMoney } = tools
 const shadowSettings = {
     shadowColor: '#000',
@@ -220,10 +220,11 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
         extrapolate: "clamp",
     })
 
+    const expandedHeight = 100
     const animatedHeight = animationController.interpolate({
         // Give the green bar more stretch past both ends
         inputRange: [-0.6, 0, 1, 1.6],
-        outputRange: [210, 100, 60, 50],
+        outputRange: [210, expandedHeight, 60, 50],
     })
 
     const animatedRotate = visualProgress.interpolate({
@@ -269,10 +270,20 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
         outputRange: [0, 0.25, 0.25, 0.25, 0],
     })
 
+    const insets = useSafeAreaInsets()
     const MONEY_AMOUNT = 800
-
     return (
         <>
+            <View
+                style={{
+                    height: insets.top,
+                    position: 'absolute',
+                    backgroundColor: '#00CB4E',
+                    width: '100%',
+                    zIndex: 999,
+                }}
+
+            ></View>
             <SafeAreaView>
                 <Animated.View // Gummy Green Section
                     style={[
@@ -317,7 +328,6 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                         styles.subHaggleContainer,
                         {
                             opacity: animatedSubOpacity,
-                         //   height: 120,
                             transform: [{ translateY: animatedSubTranslateY }],
                         },
                     ]}
@@ -361,13 +371,13 @@ const styles = StyleSheet.create({
     },
     bg: {
         display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
         fontWeight: "bold",
         fontSize: 100,
         zIndex: 2,
         backgroundColor: '#00CB4E',
-        opacity: 0.5,
+      //  opacity: 0.5,
+        alignItems: "center",
+        justifyContent: "center",
     },
     text: {
         fontSize: 20,
@@ -376,11 +386,11 @@ const styles = StyleSheet.create({
     subHaggleContainer: {
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "red",
+        backgroundColor: "#EDEDED",
         marginTop: 0,
         position: "relative",
-        bottom: 45,
         left: 0,
+        bottom: 45,
         zIndex: -10, //1
         //display: 'none',
 
@@ -417,7 +427,9 @@ const styles = StyleSheet.create({
     row: {
         display: "flex",
         flexDirection: "row",
-    //    backgroundColor: "#EDEDED",
+        //backgroundColor: "#EDEDED",
+        position: "relative",
+        top: 3
     },
     chevronContainer: {
         //backgroundColor:"blue",
