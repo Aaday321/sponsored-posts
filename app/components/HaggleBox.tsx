@@ -223,7 +223,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     const animatedHeight = animationController.interpolate({
         // Give the green bar more stretch past both ends
         inputRange: [-0.6, 0, 1, 1.6],
-        outputRange: [210, 100, 60, 70],
+        outputRange: [210, 100, 60, 50],
     })
 
     const animatedRotate = visualProgress.interpolate({
@@ -245,7 +245,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     // Match the green section's height change: 160->210 = 50px increase when rubberbanding down
     const animatedSubTranslateY = animationController.interpolate({
         inputRange: [-0.6, 0, 1, 1.6],
-        outputRange: [45, 45, -70, -210], // Move down proportionally with green section stretch
+        outputRange: [45, 45, -70, -70], // Move down proportionally with green section stretch
     })
     const animatedSubOpacity = visualProgress.interpolate({
         inputRange: [0, 1],
@@ -297,7 +297,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                         >
                             {displayMoney(MONEY_AMOUNT, false)}
                         </Animated.Text>
-                        <Animated.View style={[styles.chevronContainer, {
+                        <View style={[styles.chevronContainer, {
                            // paddingTop: animatedCheveronPadding
                         }]}>
                             <Animated.View style={{
@@ -308,7 +308,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                                     icon={faChevronRight as IconProp}
                                 />
                             </Animated.View>
-                        </Animated.View>
+                        </View>
                     </View>
                 </Animated.View>
                 <>
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
     //    backgroundColor: "#EDEDED",
     },
     chevronContainer: {
-        //    backgroundColor:"blue",
+            backgroundColor:"blue",
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
