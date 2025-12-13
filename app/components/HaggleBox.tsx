@@ -30,6 +30,8 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     const [ dealStarted, setDealStarted ] = useState(false)
     const [ , setIsCollapsed ] = useState(false)
     const [ showAddTime ] = useState(true)
+    const [ subHaggleYValue, setSubHaggleYValue ] = useState(-70)
+
     const animationController = useRef(new Animated.Value(0)).current
     const gestureStartValue = useRef(0)
 
@@ -246,7 +248,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     // Match the green section's height change: 160->210 = 50px increase when rubberbanding down
     const animatedSubTranslateY = animationController.interpolate({
         inputRange: [-0.6, 0, 1, 1.6],
-        outputRange: [45, 45, -70, -70], // Move down proportionally with green section stretch
+        outputRange: [45, 45, subHaggleYValue, subHaggleYValue], // Move down proportionally with green section stretch
     })
     const animatedSubOpacity = visualProgress.interpolate({
         inputRange: [0, 1],
@@ -331,6 +333,10 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                             transform: [{ translateY: animatedSubTranslateY }],
                         },
                     ]}
+                    onLayout={(event) => {
+                        const { height } = event.nativeEvent.layout
+                        setSubHaggleYValue(height * -0.621)
+                    }}
                     {...panResponder.panHandlers}
                 >
                     {showAddTime && (
