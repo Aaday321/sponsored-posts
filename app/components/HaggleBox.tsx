@@ -1,10 +1,11 @@
 
 import tools from '@/app/static/tools'
+import { useCollapsibleAnimation } from '@/hooks/useCollapsibleAnimation'
 import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faChevronRight, faClock } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react"
-import { Animated, PanResponder, Platform, Pressable, StyleSheet, Text, View } from "react-native"
+import { forwardRef, useImperativeHandle, useState } from "react"
+import { Animated, Platform, Pressable, StyleSheet, Text, View } from "react-native"
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 const { displayMoney } = tools
 const shadowSettings = {
@@ -18,6 +19,7 @@ const shadowSettings2 = {
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
 }
+
 export interface HaggleBoxRef {
     collapse: () => void
     expand: () => void
@@ -28,122 +30,21 @@ export interface HaggleBoxRef {
 
 const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     const [ dealStarted, setDealStarted ] = useState(false)
-    const [ , setIsCollapsed ] = useState(false)
     const [ showAddTime ] = useState(true)
     const [ subHaggleYValue, setSubHaggleYValue ] = useState(-70)
 
     const expandedHeight = 100
     const [ animatedHeightState, setAnimatedHeightState ] = useState(expandedHeight)
 
-    const animationController = useRef(new Animated.Value(0)).current
-    const gestureStartValue = useRef(0)
-
-    // Animation duration constants
-    const DURATION_FLICK_EXPAND = 120
-    const DURATION_FLICK_COLLAPSE = 100
-    const DURATION_TAP_EXPAND = 250
-    const DURATION_TAP_COLLAPSE = 120
-    const DURATION_FOLLOW_FINGER = 100 //Speed of the rest of the animation
-
-    // Custom easing function: ease-out cubic
-    const customEasing = (t: number): number => {
-       return t
-    }
-
-    const collapse = () => {
-        setIsCollapsed(true)
-        Animated.timing(animationController, {
-            toValue: 1,
-            duration: DURATION_FLICK_COLLAPSE,
-            useNativeDriver: false,
-            easing: customEasing,
-        }).start()
-    }
-
-    const expand = () => {
-        setIsCollapsed(false)
-        Animated.timing(animationController, {
-            toValue: 0,
-            duration: DURATION_FLICK_EXPAND,
-            useNativeDriver: false,
-            easing: customEasing,
-        }).start()
-    }
-
-    const toggleCollapsed = () => {
-        let nextCollapsed
-        setIsCollapsed(prev => {
-            nextCollapsed = !prev
-            return nextCollapsed
-        })
-
-        const duration = nextCollapsed ? DURATION_TAP_COLLAPSE : DURATION_TAP_EXPAND
-        Animated.timing(animationController, {
-            toValue: nextCollapsed ? 1 : 0,
-            duration,
-            useNativeDriver: false, // we animate height, so must be false
-            easing: customEasing,
-        }).start()
-
-    }
-
-    const startDrag = () => {
-        animationController.stopAnimation((value: number) => {
-            gestureStartValue.current = value
-        })
-    }
-
-    const updateDrag = (dy: number) => {
-        // Allow some over-drag past 0/1 with a rubber-band effect
-        const raw = gestureStartValue.current - dy / 200
-
-        let newValue = raw
-        if (raw < 0) {
-            // Ease out as you pull past fully expanded
-            newValue = -Math.atan(-raw) / (Math.PI / 2)
-        } else if (raw > 1) {
-            // Ease out as you pull past fully collapsed
-            const over = raw - 1
-            newValue = 1 + Math.atan(over) / (Math.PI / 2)
-        }
-
-        animationController.setValue(newValue)
-    }
-
-    const endDrag = (dy: number, vy: number) => {
-        // Treat tiny movement as a tap
-        if (Math.abs(dy) < 5 && Math.abs(vy) < 0.3) {
-            toggleCollapsed()
-            return
-        }
-
-        // Flicks: decide based mainly on velocity
-        if (Math.abs(vy) > 1) {
-            const shouldCollapse = vy < 0 // flick up = collapse
-            setIsCollapsed(shouldCollapse)
-            const duration = shouldCollapse ? DURATION_FLICK_COLLAPSE : DURATION_FLICK_EXPAND
-            Animated.timing(animationController, {
-                toValue: shouldCollapse ? 1 : 0,
-                duration,
-                useNativeDriver: false,
-                easing: customEasing,
-            }).start()
-            return
-        }
-
-        // Follow finger: animate to nearest position
-        const rawValue = gestureStartValue.current - dy / 200
-        const clampedValue = Math.max(0, Math.min(1, rawValue))
-        const shouldCollapse = clampedValue > 0.5
-
-        setIsCollapsed(shouldCollapse)
-        Animated.timing(animationController, {
-            toValue: shouldCollapse ? 1 : 0,
-            duration: DURATION_FOLLOW_FINGER,
-            useNativeDriver: false,
-            easing: customEasing,
-        }).start()
-    }
+    const {
+        animationController,
+        collapse,
+        expand,
+        startDrag,
+        updateDrag,
+        endDrag,
+        panResponder,
+    } = useCollapsibleAnimation()
 
     useImperativeHandle(ref, () => ({
         collapse,
@@ -152,70 +53,6 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
         updateDrag,
         endDrag,
     }))
-
-    const panResponder = useMemo(
-        () =>
-            PanResponder.create({
-                onStartShouldSetPanResponder: () => true,
-                onMoveShouldSetPanResponder: () => true,
-                onPanResponderGrant: () => {
-                    animationController.stopAnimation((value: number) => {
-                        gestureStartValue.current = value
-                    })
-                },
-                onPanResponderMove: (_, { dy }) => {
-                    // Allow some over-drag past 0/1 with a rubber-band effect
-                    const raw = gestureStartValue.current - dy / 200
-
-                    let newValue = raw
-                    if (raw < 0) {
-                        // Ease out as you pull past fully expanded
-                        newValue = -Math.atan(-raw) / (Math.PI / 2)
-                    } else if (raw > 1) {
-                        // Ease out as you pull past fully collapsed
-                        const over = raw - 1
-                        newValue = 1 + Math.atan(over) / (Math.PI / 2)
-                    }
-
-                    animationController.setValue(newValue)
-                },
-                onPanResponderRelease: (_, { dy, vy }) => {
-                    // Treat tiny movement as a tap
-                    if (Math.abs(dy) < 5 && Math.abs(vy) < 0.3) {
-                        toggleCollapsed()
-                        return
-                    }
-
-                    // Flicks: decide based mainly on velocity
-                    if (Math.abs(vy) > 1) {
-                        const shouldCollapse = vy < 0 // flick up = collapse
-                        setIsCollapsed(shouldCollapse)
-                        const duration = shouldCollapse ? DURATION_FLICK_COLLAPSE : DURATION_FLICK_EXPAND
-                        Animated.timing(animationController, {
-                            toValue: shouldCollapse ? 1 : 0,
-                            duration,
-                            useNativeDriver: false,
-                            easing: customEasing,
-                        }).start()
-                        return
-                    }
-
-                    // Follow finger: animate to nearest position
-                    const rawValue = gestureStartValue.current - dy / 200
-                    const clampedValue = Math.max(0, Math.min(1, rawValue))
-                    const shouldCollapse = clampedValue > 0.5
-
-                    setIsCollapsed(shouldCollapse)
-                    Animated.timing(animationController, {
-                        toValue: shouldCollapse ? 1 : 0,
-                        duration: DURATION_FOLLOW_FINGER,
-                        useNativeDriver: false,
-                        easing: customEasing,
-                    }).start()
-                },
-            }),
-        [animationController],
-    )
 
     // Raw animationController may go slightly beyond [0,1] during rubber-band.
     // visualProgress is clamped so only height stretches; everything else stays in-range.
