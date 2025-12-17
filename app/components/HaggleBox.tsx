@@ -4,7 +4,7 @@ import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faChevronRight, faClock } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react"
-import {Animated, PanResponder, Platform, Pressable, StyleSheet, Text, View} from "react-native"
+import { Animated, PanResponder, Platform, Pressable, StyleSheet, Text, View } from "react-native"
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 const { displayMoney } = tools
 const shadowSettings = {
@@ -31,6 +31,9 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     const [ , setIsCollapsed ] = useState(false)
     const [ showAddTime ] = useState(true)
     const [ subHaggleYValue, setSubHaggleYValue ] = useState(-70)
+
+    const expandedHeight = 100
+    const [ animatedHeightState, setAnimatedHeightState ] = useState(expandedHeight)
 
     const animationController = useRef(new Animated.Value(0)).current
     const gestureStartValue = useRef(0)
@@ -222,7 +225,6 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
         extrapolate: "clamp",
     })
 
-    const expandedHeight = 100
     const animatedHeight = animationController.interpolate({
         // Give the green bar more stretch past both ends
         inputRange: [-0.6, 0, 1, 1.6],
@@ -272,6 +274,7 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
         outputRange: [0, 0.25, 0.25, 0.25, 0],
     })
 
+
     const insets = useSafeAreaInsets()
     const MONEY_AMOUNT = 800
     return (
@@ -296,12 +299,18 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                             ...shadowSettings2,
                             shadowOpacity: animatedShadowOpacity,
                          //   position: 'relative',
-                          //  top: animatedTop,
+                            top: insets.top,
+                            width: '100%',
+
                          //   bottom: animatedTop,
                          //   left: 0,
-
                         }
                     ]}
+                    onLayout={(event) => {
+                        const height = event.nativeEvent.layout.height
+                        setAnimatedHeightState(height)
+                        console.log("Green section height:", height)
+                    }}
                     { ...panResponder.panHandlers }
                 >
                     <View style={styles.row}>
@@ -329,12 +338,25 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                     style={[
                         styles.subHaggleContainer,
                         {
+                            top: (()=>{
+                                const insetsTop = insets.top
+                                const green = animatedHeightState
+                                const sum = Number(green) + insetsTop
+                                console.log({
+                                    top: insetsTop,
+                                    green,
+                                    sum,
+                                })
+                                return sum - 45
+                            })(),
+                            //height: 200,
                             opacity: animatedSubOpacity,
                             transform: [{ translateY: animatedSubTranslateY }],
                         },
                     ]}
                     onLayout={(event) => {
                         const { height } = event.nativeEvent.layout
+                        console.log({subHeight: height})
                         setSubHaggleYValue(height * -0.621)
                     }}
                     {...panResponder.panHandlers}
@@ -379,11 +401,12 @@ const styles = StyleSheet.create({
         display: "flex",
         fontWeight: "bold",
         fontSize: 100,
-        zIndex: 2,
+        zIndex: 200,
         backgroundColor: '#00CB4E',
       //  opacity: 0.5,
         alignItems: "center",
         justifyContent: "center",
+        position: "absolute",
     },
     text: {
         fontSize: 20,
@@ -394,11 +417,8 @@ const styles = StyleSheet.create({
         flexDirection: "column",
         backgroundColor: "#EDEDED",
         marginTop: 0,
-        position: "relative",
+        position: "absolute",
         left: 0,
-        bottom: 45,
-        zIndex: -10, //1
-        //display: 'none',
 
             ...shadowSettings,
     },

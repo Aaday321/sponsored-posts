@@ -2,7 +2,6 @@ import ChatInput from "@/app/components/ChatInput"
 import HaggleBox, { type HaggleBoxRef } from "@/app/components/HaggleBox"
 import { type MessageData } from "@/app/components/Message"
 import MessageList from "@/app/components/MessageList"
-import { LinearGradient } from "expo-linear-gradient"
 import { useRef, useState } from "react"
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native"
 
@@ -158,11 +157,12 @@ const styles = StyleSheet.create({
     screen: {
         flex: 1,
         backgroundColor: "#FFFFFF",
+        zIndex: -1
     },
     chatWrapper: {
         flex: 1,
         position: "relative",
-        zIndex: 0,
+        zIndex: -10,
     },
     container: {
         flex: 1,
