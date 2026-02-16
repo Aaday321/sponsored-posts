@@ -1,15 +1,16 @@
-import {View} from "react-native"
 import HaggleBox from "@/app/components/HaggleBox"
-import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context'
+import { View } from "react-native"
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface Props {
     children: any
+    topOnly?: boolean
 }
 
-export default function YES({children}: Props) {
+export default function YES({children, topOnly = false }: Props) {
     const insets = useSafeAreaInsets()
     return (
-        <SafeAreaView>
+        <SafeAreaView style={{ flex: 1 }} edges={topOnly ? ['top'] : ['top', 'bottom']}>
             <View
                 style={{
                     height: insets.top,
@@ -24,7 +25,7 @@ export default function YES({children}: Props) {
             <View
                 style={{
                     paddingTop: insets.top,
-                    backgroundColor: 'blue',
+                    flex: 1,
                 }}
             >
                 {children}
