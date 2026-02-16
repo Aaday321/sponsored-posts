@@ -275,56 +275,45 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
     const insets = useSafeAreaInsets()
     const MONEY_AMOUNT = 800
     return (
-        <>
-            <View
-                style={{
-                    height: insets.top,
-                    position: 'absolute',
-                    backgroundColor: '#00CB4E',
-                    width: '100%',
-                    zIndex: 999,
-                }}
-
-            ></View>
-            <SafeAreaView>
-                <Animated.View // Gummy Green Section
-                    style={[
-                        styles.bg,
-                        {
-                            height: animatedHeight,
-                           // paddingTop: animatedPaddingBottom,
-                            ...shadowSettings2,
-                            shadowOpacity: animatedShadowOpacity,
-                         //   position: 'relative',
-                          //  top: animatedTop,
-                         //   bottom: animatedTop,
-                         //   left: 0,
-
-                        }
-                    ]}
-                    { ...panResponder.panHandlers }
-                >
-                    <View style={styles.row}>
-                        <Animated.Text
-                           style={[styles.money, { fontSize: animatedFontSize }]}
-                        >
-                            {displayMoney(MONEY_AMOUNT, false)}
-                        </Animated.Text>
-                        <View style={[styles.chevronContainer, {
-                           // paddingTop: animatedCheveronPadding
-                        }]}>
-                            <Animated.View style={{
-                                transform: [{ rotate: animatedRotate }],
-                                //  backgroundColor: 'blue'
-                            }}>
-                                <FontAwesomeIcon
-                                    icon={faChevronRight as IconProp}
-                                />
-                            </Animated.View>
-                        </View>
+        <View
+            style={{
+                position: 'absolute',
+                top: insets.top,
+                zIndex: 100,
+            }}
+        >
+            <Animated.View // Gummy Green Section
+                style={[
+                    styles.bg,
+                    {
+                        height: animatedHeight,
+                        ...shadowSettings2,
+                        shadowOpacity: animatedShadowOpacity,
+                    }
+                ]}
+                { ...panResponder.panHandlers }
+            >
+                <View style={styles.row}>
+                    <Animated.Text
+                        style={[styles.money, { fontSize: animatedFontSize }]}
+                    >
+                        {displayMoney(MONEY_AMOUNT, false)}
+                    </Animated.Text>
+                    <View style={[styles.chevronContainer, {
+                        // paddingTop: animatedCheveronPadding
+                    }]}>
+                        <Animated.View style={{
+                            transform: [{ rotate: animatedRotate }],
+                            //  backgroundColor: 'blue'
+                        }}>
+                            <FontAwesomeIcon
+                                icon={faChevronRight as IconProp}
+                            />
+                        </Animated.View>
                     </View>
-                </Animated.View>
-                <>
+                </View>
+            </Animated.View>
+            <>
                 <Animated.View
                     style={[
                         styles.subHaggleContainer,
@@ -360,9 +349,8 @@ const HaggleBox = forwardRef<HaggleBoxRef>((_, ref) => {
                     </View>
                 </Animated.View>
 
-                </>
-            </SafeAreaView>
-        </>
+            </>
+        </View>
     )
 })
 
@@ -397,7 +385,7 @@ const styles = StyleSheet.create({
         position: "relative",
         left: 0,
         bottom: 45,
-        zIndex: -10, //1
+        zIndex: 1, //1
         //display: 'none',
 
             ...shadowSettings,

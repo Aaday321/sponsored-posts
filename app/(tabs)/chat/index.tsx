@@ -4,10 +4,13 @@ import { type MessageData } from "@/app/components/Message"
 import MessageList from "@/app/components/MessageList"
 import { LinearGradient } from "expo-linear-gradient"
 import { useRef, useState } from "react"
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native"
+import { KeyboardAvoidingView, Platform, StyleSheet, View, Text } from "react-native"
+import {SafeAreaView} from "react-native-safe-area-context";
+import YES from "@/app/components/YES";
 
 export default function Chat() {
     const haggleBoxRef = useRef<HaggleBoxRef>(null)
+
     const [ messages ] = useState<MessageData[]>([
         {
             id: '1',
@@ -138,31 +141,22 @@ export default function Chat() {
     ])
 
     return (
-        <View style={styles.screen}>
-            <HaggleBox ref={haggleBoxRef} />
-            <View style={styles.chatWrapper}>
-                <KeyboardAvoidingView
-                    style={styles.container}
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-                >
-                    <MessageList messages={messages} />
-                    <ChatInput />
-                </KeyboardAvoidingView>
+        <YES>
+            <View style={styles.screen}>
+                <Text>sdfdsf</Text>
             </View>
-        </View>
+        </YES>
     )
 }
 
 const styles = StyleSheet.create({
     screen: {
-        flex: 1,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: "red",
+        height: 1000,
     },
     chatWrapper: {
         flex: 1,
-        position: "relative",
-        zIndex: 0,
+        backgroundColor: "blue",
     },
     container: {
         flex: 1,

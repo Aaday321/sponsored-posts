@@ -1,9 +1,23 @@
-import { Platform, StyleSheet } from 'react-native'
+import {Platform, StyleSheet, View} from 'react-native'
 import HaggleBox from "@/app/components/HaggleBox"
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function HomeScreen() {
+    const insets = useSafeAreaInsets()
   return (
-    <HaggleBox/>
+      <>
+          <View
+              style={{
+                  height: insets.top,
+                  position: 'absolute',
+                  backgroundColor: '#00CB4E',
+                  width: '100%',
+                  zIndex: 999,
+              }}
+
+          ></View>
+          <HaggleBox/>
+      </>
   )
 }
 
