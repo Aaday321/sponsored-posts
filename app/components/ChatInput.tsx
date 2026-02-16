@@ -4,8 +4,22 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { useState } from "react"
 import { Pressable, StyleSheet, TextInput, View } from "react-native"
 
-export default function ChatInput() {
+interface ChatInputProps {
+    onSend?: (text: string) => void
+    onFocus?: () => void
+    onBlur?: () => void
+}
+
+export default function ChatInput({ onSend, onFocus, onBlur }: ChatInputProps) {
     const [inputText, setInputText] = useState('')
+
+    const handleSend = () => {
+        const trimmed = inputText.trim()
+        if (trimmed && onSend) {
+            onSend(trimmed)
+            setInputText('')
+        }
+    }
 
     return (
         <View style={styles.inputContainer}>
@@ -21,8 +35,12 @@ export default function ChatInput() {
                 placeholderTextColor="#999"
                 value={inputText}
                 onChangeText={setInputText}
+                onSubmitEditing={handleSend}
+                onFocus={onFocus}
+                onBlur={onBlur}
+                returnKeyType="send"
             />
-            <Pressable style={styles.iconButton}>
+            <Pressable style={styles.iconButton} onPress={handleSend}>
                 <FontAwesomeIcon
                     icon={faPaperPlane as IconProp}
                     style={styles.icon}

@@ -1,171 +1,109 @@
 import ChatInput from "@/app/components/ChatInput"
-import { type HaggleBoxRef } from "@/app/components/HaggleBox"
-import { type MessageData } from "@/app/components/Message"
 import MessageList from "@/app/components/MessageList"
 import YES from "@/app/components/YES"
-import { useRef, useState } from "react"
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native"
+import { useChatChannel } from "@/hooks/useChatChannel"
+import { useAuth } from "@/lib/auth-context"
+import { useLocalSearchParams } from "expo-router"
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native"
 
-export default function Chat() {
-    const haggleBoxRef = useRef<HaggleBoxRef>(null)
+export default function ChatScreen() {
+  const { channelId: channelIdParam } = useLocalSearchParams<{ channelId?: string }>()
+  const channelId = channelIdParam ? parseInt(channelIdParam, 10) : 1
+  const { isAuthenticated, token } = useAuth()
+  const {
+    messages,
+    isLoading,
+    isConnected,
+    typingUser,
+    sendMessage,
+    sendTypingStart,
+    sendTypingStop,
+  } = useChatChannel(isAuthenticated && token && !Number.isNaN(channelId) ? channelId : null)
 
-    const [ messages ] = useState<MessageData[]>([
-        {
-            id: '1',
-            type: 'price',
-            price: 800,
-            isFromUser: true,
-            timestamp: 'price change'
-        },
-        {
-            id: '2',
-            type: 'text',
-            text: 'You must be smoking crack',
-            isFromUser: false,
-        },
-        {
-            id: '3',
-            type: 'price',
-            price: 1200,
-            isFromUser: false,
-            timestamp: 'price change'
-        },
-        {
-            id: '4',
-            type: 'text',
-            text: 'That price is way too high for what you\'re offering',
-            isFromUser: true,
-        },
-        {
-            id: '5',
-            type: 'text',
-            text: 'I think $1000 is more reasonable',
-            isFromUser: false,
-        },
-        {
-            id: '6',
-            type: 'price',
-            price: 1000,
-            isFromUser: true,
-            timestamp: 'price change'
-        },
-        {
-            id: '7',
-            type: 'text',
-            text: 'Deal! When can you start?',
-            isFromUser: false,
-        },
-        {
-            id: '8',
-            type: 'text',
-            text: 'I can start next Monday',
-            isFromUser: true,
-        },
-        {
-            id: '9',
-            type: 'text',
-            text: 'Perfect, I\'ll send over the details',
-            isFromUser: false,
-        },
-        {
-            id: '10',
-            type: 'price',
-            price: 950,
-            isFromUser: false,
-            timestamp: 'price change'
-        },
-        {
-            id: '11',
-            type: 'text',
-            text: 'Actually, can we do $950?',
-            isFromUser: false,
-        },
-        {
-            id: '12',
-            type: 'text',
-            text: 'Sure, that works for me',
-            isFromUser: true,
-        },
-        {
-            id: '13',
-            type: 'price',
-            price: 950,
-            isFromUser: true,
-            timestamp: 'price change'
-        },
-        {
-            id: '14',
-            type: 'text',
-            text: 'Great! Looking forward to working with you',
-            isFromUser: false,
-        },
-        {
-            id: '15',
-            type: 'text',
-            text: 'Same here!',
-            isFromUser: true,
-        },
-        {
-            id: '16',
-            type: 'text',
-            text: 'I\'ll send the contract over by end of day',
-            isFromUser: false,
-        },
-        {
-            id: '17',
-            type: 'text',
-            text: 'Sounds good, thanks!',
-            isFromUser: true,
-        },
-        {
-            id: '18',
-            type: 'price',
-            price: 1100,
-            isFromUser: false,
-            timestamp: 'price change'
-        },
-        {
-            id: '19',
-            type: 'text',
-            text: 'Wait, I need to reconsider the scope',
-            isFromUser: false,
-        },
-        {
-            id: '20',
-            type: 'text',
-            text: 'No problem, let me know what you need',
-            isFromUser: true,
-        },
-    ])
-
+  if (!isAuthenticated || !token) {
     return (
-        <YES topOnly={true}>
-            <View style={styles.screen}>
-                <View style={styles.chatWrapper}>
-                    <KeyboardAvoidingView
-                        style={styles.container}
-                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-                    >
-                        <MessageList messages={messages} />
-                        <ChatInput />
-                    </KeyboardAvoidingView>
-                </View>
-            </View>
-        </YES>
+      <YES topOnly={true}>
+        <View style={styles.centered}>
+          <Text style={styles.placeholderText}>
+            Sign in and set your token to use chat. Use AuthProvider setAuth(token, userId).
+          </Text>
+        </View>
+      </YES>
     )
+  }
+
+  if (isLoading) {
+    return (
+      <YES topOnly={true}>
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#00CB4E" />
+        </View>
+      </YES>
+    )
+  }
+
+  return (
+    <YES topOnly={true}>
+      <View style={styles.screen}>
+        {!isConnected && (
+          <View style={styles.banner}>
+            <Text style={styles.bannerText}>Reconnecting…</Text>
+          </View>
+        )}
+        {typingUser && (
+          <View style={styles.typingBanner}>
+            <Text style={styles.typingText}>{typingUser} is typing</Text>
+          </View>
+        )}
+        <View style={styles.chatWrapper}>
+          <MessageList messages={messages} />
+          <ChatInput
+            onSend={sendMessage}
+            onFocus={sendTypingStart}
+            onBlur={sendTypingStop}
+          />
+        </View>
+      </View>
+    </YES>
+  )
 }
 
 const styles = StyleSheet.create({
-    screen: {
-        flex: 1,
-    },
-    chatWrapper: {
-        flex: 1,
-    },
-    container: {
-        flex: 1,
-        backgroundColor: "#FFFFFF",
-    },
+  screen: {
+    flex: 1,
+  },
+  chatWrapper: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    padding: 24,
+  },
+  placeholderText: {
+    textAlign: "center",
+    color: "#666",
+    fontSize: 14,
+  },
+  banner: {
+    padding: 8,
+    backgroundColor: "#fff3cd",
+  },
+  bannerText: {
+    textAlign: "center",
+    fontSize: 12,
+    color: "#856404",
+  },
+  typingBanner: {
+    padding: 4,
+    backgroundColor: "#f0f0f0",
+  },
+  typingText: {
+    fontSize: 12,
+    color: "#666",
+    fontStyle: "italic",
+  },
 })
-
